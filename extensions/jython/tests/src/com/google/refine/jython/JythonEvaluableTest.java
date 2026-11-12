@@ -43,6 +43,23 @@ public class JythonEvaluableTest {
         return bindings;
     }
 
+    @Test
+    public void testColumnName() {
+        Properties bindings = createBindings();
+        Evaluable evaluable = new JythonEvaluable("return columnName");
+        assertEquals(evaluable.evaluate(bindings), "number");
+        bindings.put("columnName", "other column");
+        assertEquals(evaluable.evaluate(bindings), "other column");
+    }
+
+    @Test
+    public void testMissingColumnName() {
+        Properties bindings = createBindings();
+        bindings.remove("columnName");
+        Evaluable evaluable = new JythonEvaluable("return columnName");
+        Assert.assertNull(evaluable.evaluate(bindings));
+    }
+
     // Reproduces the situation when result is a PyObject
     // Version with a test case which only calls the existing evaluate method
     @Test
@@ -154,8 +171,9 @@ public class JythonEvaluableTest {
 
     @Test
     public void testEvalErrorOnSomeBindings() {
-        String testKey = "columnName";
+        String testKey = "unsupportedBinding";
         Properties bindings = createBindings();
+        bindings.put(testKey, "value");
         assertTrue(bindings.containsKey(testKey), "Bindings should contain '" + testKey + "'.");
 
         Evaluable evaluable = new JythonEvaluable("return " + testKey);
